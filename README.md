@@ -4,7 +4,9 @@ Bem-vindo a este projeto de estudo prático focado na construção de uma API Gr
 
 Este repositório documenta o passo a passo da criação de uma API para uma biblioteca fictícia, contendo 100 livros e seus respectivos autores.
 
-![Apollo Sandbox Screenshot](https://i.imgur.com/k2e4xUn.png)
+<br>
+
+![Apollo Sandbox Screenshot](https://github.com/user-attachments/assets/4bd903f5-92b5-4fdb-a9df-c0aca4e95e7a)
 *Um exemplo da API em ação no Apollo Sandbox.*
 
 <br>
