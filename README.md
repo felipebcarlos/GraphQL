@@ -58,31 +58,37 @@ Para executar este projeto localmente, siga os passos abaixo.
 ### Pré-requisitos
 
 * É necessário ter o [Node.js](https://nodejs.org/en/download/) (versão 18.x ou superior) instalado.
-* Um gerenciador de pacotes como `npm` ou `yarn`.
+* Um gerenciador de pacotes como `npm` ou `yarn`. (npm pode ser incluído na instalação do Node.js)
 
-### Instalação
+### Configuração
 
-1.  Clone este repositório para a sua máquina local:
-    ```bash
-    git clone [https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git](https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git)
+1.  Copie o arquivo index.js hospedado neste repositório.
+
+2.  Abra uma sessão de Powershell e crie uma pasta para seu projeto:
+    ```powershell
+    mkdir graphql-server-example
     ```
 
-2.  Navegue até o diretório do projeto:
-    ```bash
-    cd SEU_REPOSITORIO
+3.  Navegue até o diretório do projeto:
+    ```powershell
+    cd graphql-server-example
     ```
 
-3.  Instale as dependências necessárias:
-    ```bash
-    npm install
+4.  Inicie o projeto e instale as dependências:
+    ```powershell
+    # Inicia um projeto npm com as configurações padrão
+    npm init -y
+
+    # Instala as bibliotecas necessárias
+    npm install @apollo/server graphql
     ```
 
-4.  Inicie o servidor GraphQL:
-    ```bash
+5.  Inicie o servidor GraphQL:
+    ```powershell
     node index.js
     ```
 
-5.  Abra seu navegador e acesse **[http://localhost:4000/](http://localhost:4000/)**. Você será recebido pelo **Apollo Sandbox**, uma interface gráfica onde poderá executar todas as queries.
+6.  Abra seu navegador e acesse **[http://localhost:4000/](http://localhost:4000/)**. Você será recebido pelo **Apollo Sandbox**, uma interface gráfica onde poderá executar todas as queries.
 
 ## 🎯 Exemplos de Queries
 
