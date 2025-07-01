@@ -142,6 +142,27 @@ query {
 }
 ```
 
+### 5. Buscar todos os campos que estão na nossa base
+```graphql
+query BuscarTodosOsLivros {
+  livros {
+    id
+    titulo
+    genero
+	  notaMediaLeitores
+    precoMedio
+    quantidadeVendas
+    editora
+    dataLancamento
+    autor {
+      id
+      nome
+      pais
+    }
+  }
+}
+```
+
 ## 📂 Estrutura do projeto
 ```tree
 /
