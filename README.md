@@ -15,7 +15,10 @@ Este repositório documenta o passo a passo da criação de uma API para uma bib
   <img src="https://img.shields.io/badge/Node.js-18.x+-brightgreen?style=for-the-badge&logo=node.js" alt="Node.js version">
   <img src="https://img.shields.io/badge/GraphQL-v16.x-E10098?style=for-the-badge&logo=graphql" alt="GraphQL version">
   <img src="https://img.shields.io/badge/Apollo%20Server-v4.x-311C87?style=for-the-badge&logo=apollo-graphql" alt="Apollo Server version">
-  <img src="https://img.shields.io/badge/License-MIT-yellow.svg"><img src="https://opensource.org/licenses/MIT">
+  <img src="https://img.shields.io/github/license/felipebcarlos/GraphQL?style=for-the-badge&logo=mit">
+  <img src="https://img.shields.io/badge/PowerShell-5391FE?style=for-the-badge&logo=powershell&logoColor=white">
+  <img src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white">
+
 </p>
 
 ## 📚 Tabela de Conteúdos
@@ -44,12 +47,15 @@ Toda a base de dados é estática e está contida no próprio arquivo `index.js`
 -   [x] **Queries com Argumentos**: Busca por um livro ou autor específico através de seu `ID`.
 -   [x] **Grafo de Dados Relacional**: Implementação de um relacionamento entre `Livro` e `Autor`.
 -   [x] **Resolvers Aninhados**: Lógica que permite navegar entre as entidades (ex: buscar um livro e, dentro dele, os detalhes do autor).
+-   [x] **Implementar Mutations**: Adicionar a capacidade de criar, atualizar e deletar livros e autores.
 
 ## 🛠️ Tecnologias Utilizadas
 
 * **[Node.js](https://nodejs.org/)**: Ambiente de execução JavaScript no lado do servidor.
 * **[GraphQL](https://graphql.org/)**: Linguagem de consulta para APIs.
 * **[Apollo Server](https://www.apollographql.com/docs/apollo-server/)**: Servidor GraphQL para Node.js que facilita a conexão com frameworks e o gerenciamento do schema.
+* **[Windows 11](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)**: Sistema operacional usado para esta demonstração.
+* **[](https://learn.microsoft.com/pt-br/powershell/scripting/overview?view=powershell-5.1)**: Shell de comando nativo do sistema operacional Windows, e usado para esta demonstração.
 
 ## 🏁 Como Executar o Projeto
 
@@ -94,13 +100,24 @@ Para executar este projeto localmente, siga os passos abaixo.
 
 Copie e cole estas queries no Apollo Sandbox para ver a mágica acontecer!
 
-### 1. Buscar a lista de todos os livros, mas apenas o título e a nota média
+### 1. Buscar a lista de todos os livros e todos os campos de informação
 
 ```graphql
 query {
   livros {
     titulo
+    genero
+    edicao
+    precoMedio
+    quantidadeVendas
+    dataLancamento
+    editora
     notaMediaLeitores
+    autor {
+      id
+      nome
+      pais
+    }
   }
 }
 ```
@@ -109,57 +126,64 @@ query {
 
 ```graphql
 query {
-  livro(id: "42") {
+  livro(id: "34") {
     id
     titulo
-    genero
-    editora
-    notaMediaLeitores
+    autor {
+      nome
+    }    
   }
 }
 ```
 
-### 3. Buscar um autor e todos os livros dele que estão na nossa base
+### 3. Buscar todos os livros de uma editora que estão na nossa base
 ```graphql
 query {
-  autor(id: "6") { # ID de J.R.R. Tolkien
-    nome
-    pais
-    livros {
-      titulo
-      genero
-      dataLancamento
+  livros(filter: {editora: "Record", notaMinima: 4.0}) {
+    titulo
     }
   }
 }
 ```
 
-### 4. Buscar um livro e, a partir dele, navegar para os dados do autor
+### 4. Buscar por livros que tenham nota dos leitores acima de 4.0
 ```graphql
-query {
-  livro(id: "51") { # A Guerra dos Tronos
+query BuscarLivrosComBoasNotas {
+  livros(filter: { notaMinima: 4.0 }) {
+    id
     titulo
     notaMediaLeitores
     autor {
       nome
-      pais
     }
   }
 }
 ```
 
-### 5. Buscar todos os campos que estão na nossa base
+### 5. Criar um novo livro na base
 ```graphql
-query BuscarTodosOsLivros {
-  livros {
+mutation CriarLivroCompletoComAutor {
+  adicionarLivroComNovoAutor(
+    livroData: {
+      titulo: "As Aventuras Completas de GraphQL"
+      genero: "Ficção Científica Didática"
+      editora: "Galáxia Dev"
+      precoMedio: 129.90
+      notaMediaLeitores: 5.0
+      dataLancamento: "2025-07-06"
+    },
+    autorData: {
+      nome: "Astro Coder"
+      pais: "Via Láctea"
+    }
+  ) {
     id
     titulo
-    genero
-	  notaMediaLeitores
     precoMedio
-    quantidadeVendas
-    editora
     dataLancamento
+    genero
+    editora
+    notaMediaLeitores
     autor {
       id
       nome
@@ -182,7 +206,6 @@ query BuscarTodosOsLivros {
 ## 🔮 Próximos Passos
 Este projeto é um ponto de partida. Os próximos passos lógicos para evoluí-lo seriam:
 
--   [ ] **Implementar Mutations**: Adicionar a capacidade de criar, atualizar e deletar livros e autores.
 -   [ ] **Adicionar Filtros Avançados**: Implementar filtros por gênero, preço, data de lançamento, etc.
 -   [ ] **Implementar Paginação**: Retornar os dados em "páginas" para lidar com grandes volumes de informação.
 -   [ ] **Conectar a um Banco de Dados**: Substituir a base de dados estática por uma conexão a um banco de dados real (como PostgreSQL, MongoDB ou Firebase).
