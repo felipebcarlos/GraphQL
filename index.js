@@ -1,15 +1,14 @@
 const { ApolloServer } = require('@apollo/server');
 const { startStandaloneServer } = require('@apollo/server/standalone');
 
+// =============================================================================
 // 1. DEFINIÇÃO DO SCHEMA (TYPEDEFS)
-// Agora temos dois tipos principais: Livro e Autor, e eles se referenciam.
+// =============================================================================
 const typeDefs = `#graphql
-  """
-  Representa um livro na nossa biblioteca.
-  """
+  # TIPOS DE DADOS #
   type Livro {
     id: ID!
-    titulo: String
+    titulo: String!
     genero: String
     edicao: String
     precoMedio: Float
@@ -20,28 +19,74 @@ const typeDefs = `#graphql
     autor: Autor
   }
 
-  """
-  Representa um autor, que pode ter escrito múltiplos livros.
-  """
   type Autor {
     id: ID!
-    nome: String
+    nome: String!
     pais: String
     livros: [Livro]
   }
 
+  # INPUTS PARA FILTROS #
+  input LivroFilterInput {
+    genero: String
+    editora: String
+    notaMinima: Float
+  }
+
+  # INPUTS PARA MUTATIONS #
+  input AddLivroInput {
+    titulo: String!
+    autorId: ID!
+    genero: String
+    editora: String
+    precoMedio: Float
+    notaMediaLeitores: Float
+    dataLancamento: String
+  }
+  
+  input UpdateLivroInput {
+    titulo: String
+    genero: String
+    editora: String
+    precoMedio: Float
+    notaMediaLeitores: Float
+  }
+
+  input AddAutorInput {
+    nome: String!
+    pais: String
+  }
+
+  input AddLivroDataInput {
+    titulo: String!
+    genero: String
+    editora: String
+    precoMedio: Float
+    notaMediaLeitores: Float
+    dataLancamento: String
+  }
+
+  # QUERIES (BUSCA DE DADOS) #
   type Query {
-    livros: [Livro]
+    livros(filter: LivroFilterInput): [Livro]
     livro(id: ID!): Livro
     autores: [Autor]
     autor(id: ID!): Autor
   }
+
+  # MUTATIONS (MODIFICAÇÃO DE DADOS) #
+  type Mutation {
+    adicionarLivro(input: AddLivroInput!): Livro!
+    atualizarLivro(id: ID!, input: UpdateLivroInput!): Livro
+    deletarLivro(id: ID!): Livro
+    adicionarLivroComNovoAutor(livroData: AddLivroDataInput!, autorData: AddAutorInput!): Livro!
+  }
 `;
 
-// 2. BASE DE DADOS
-// Agora temos duas listas: uma para autores e outra para livros.
-
-const autores = [
+// =============================================================================
+// 2. BASE DE DADOS ESTÁTICA
+// =============================================================================
+let autores = [
     { id: "1", nome: "Gabriel García Márquez", pais: "Colômbia" },
     { id: "2", nome: "George Orwell", pais: "Reino Unido" },
     { id: "3", nome: "Miguel de Cervantes", pais: "Espanha" },
@@ -98,7 +143,6 @@ const autores = [
     { id: "54", nome: "H.G. Wells", pais: "Reino Unido" },
     { id: "55", nome: "Philip K. Dick", pais: "EUA" },
     { id: "56", nome: "William Gibson", pais: "EUA" },
-    { id: "57", nome: "George Orwell", pais: "Reino Unido" },
     { id: "58", nome: "H.P. Lovecraft", pais: "EUA" },
     { id: "59", nome: "Edgar Allan Poe", pais: "EUA" },
     { id: "60", nome: "Virginia Woolf", pais: "Reino Unido" },
@@ -114,7 +158,7 @@ const autores = [
     { id: "70", nome: "Chimamanda Ngozi Adichie", pais: "Nigéria" },
 ];
 
-const livros = [
+let livros = [
     { id: "1", autorId: "1", titulo: "Cem Anos de Solidão", genero: "Realismo Mágico", edicao: "Capa Comum", precoMedio: 59.90, quantidadeVendas: 50000000, dataLancamento: "1967-05-30", editora: "Record", notaMediaLeitores: 4.8 },
     { id: "2", autorId: "2", titulo: "1984", genero: "Distopia", edicao: "Edição de Luxo", precoMedio: 45.50, quantidadeVendas: 65000000, dataLancamento: "1949-06-08", editora: "Companhia das Letras", notaMediaLeitores: 4.9 },
     { id: "3", autorId: "3", titulo: "Dom Quixote", genero: "Sátira", edicao: "Edição Comentada", precoMedio: 89.90, quantidadeVendas: 500000000, dataLancamento: "1605-01-16", editora: "Penguin Classics", notaMediaLeitores: 4.7 },
@@ -198,7 +242,7 @@ const livros = [
     { id: "81", autorId: "40", titulo: "A Trilogia de Fundação", genero: "Ficção Científica", edicao: "Clássicos da Ficção", precoMedio: 85.00, quantidadeVendas: 20000000, dataLancamento: "1951-05-01", editora: "Aleph", notaMediaLeitores: 4.9 },
     { id: "82", autorId: "6", titulo: "O Silmarillion", genero: "Fantasia", edicao: "Mitologia", precoMedio: 70.00, quantidadeVendas: 10000000, dataLancamento: "1977-09-15", editora: "HarperCollins", notaMediaLeitores: 4.6 },
     { id: "83", autorId: "10", titulo: "Razão e Sensibilidade", genero: "Romance", edicao: "Clássicos", precoMedio: 48.00, quantidadeVendas: 15000000, dataLancamento: "1811-10-30", editora: "Zahar", notaMediaLeitores: 4.7 },
-    { id: "84", autorId: "36", titulo: "O Homem Invisível", genero: "Ficção Científica", edicao: "Clássicos", precoMedio: 39.90, quantidadeVendas: 10000000, dataLancamento: "1897-01-01", editora: "Principis", notaMediaLeitores: 4.4 },
+    { id: "84", autorId: "54", titulo: "O Homem Invisível", genero: "Ficção Científica", edicao: "Clássicos", precoMedio: 39.90, quantidadeVendas: 10000000, dataLancamento: "1897-01-01", editora: "Principis", notaMediaLeitores: 4.4 },
     { id: "85", autorId: "39", titulo: "Messias de Duna", genero: "Ficção Científica", edicao: "Série Duna", precoMedio: 55.00, quantidadeVendas: 8000000, dataLancamento: "1969-01-01", editora: "Aleph", notaMediaLeitores: 4.7 },
     { id: "86", autorId: "47", titulo: "O Velho e o Mar", genero: "Ficção", edicao: "Clássicos Modernos", precoMedio: 35.00, quantidadeVendas: 12000000, dataLancamento: "1952-09-01", editora: "Bertrand Brasil", notaMediaLeitores: 4.6 },
     { id: "87", autorId: "15", titulo: "As Crônicas Marcianas", genero: "Ficção Científica", edicao: "Contos", precoMedio: 53.00, quantidadeVendas: 5000000, dataLancamento: "1950-05-04", editora: "Biblioteca Azul", notaMediaLeitores: 4.7 },
@@ -209,46 +253,98 @@ const livros = [
     { id: "92", autorId: "70", titulo: "Meio Sol Amarelo", genero: "Ficção Histórica", edicao: "Contemporânea", precoMedio: 68.00, quantidadeVendas: 1500000, dataLancamento: "2006-08-01", editora: "Companhia das Letras", notaMediaLeitores: 4.8 },
     { id: "93", autorId: "69", titulo: "O Gigante Enterrado", genero: "Fantasia", edicao: "Ficção Literária", precoMedio: 61.00, quantidadeVendas: 1000000, dataLancamento: "2015-03-03", editora: "Companhia das Letras", notaMediaLeitores: 4.3 },
     { id: "94", autorId: "68", titulo: "Kafka à Beira-Mar", genero: "Realismo Mágico", edicao: "Capa Comum", precoMedio: 79.00, quantidadeVendas: 5000000, dataLancamento: "2002-09-12", editora: "Alfaguara", notaMediaLeitores: 4.7 },
-    { id: "95", autorId: "34", titulo: "O Alienista", genero: "Sátira", edicao: "Contos", precoMedio: 28.00, quantidadeVendas: 1000000, dataLancamento: "1882-01-01", editora: "L&PM", notaMediaLeitores: 4.8 },
-    { id: "96", autorId: "41", titulo: "A Odisseia", genero: "Poema Épico", edicao: "Tradução Direta", precoMedio: 65.00, quantidadeVendas: 50000000, dataLancamento: "800 a.C.", editora: "Editora 34", notaMediaLeitores: 4.7 },
+    { id: "95", autorId: "32", titulo: "O Alienista", genero: "Sátira", edicao: "Contos", precoMedio: 28.00, quantidadeVendas: 1000000, dataLancamento: "1882-01-01", editora: "L&PM", notaMediaLeitores: 4.8 },
+    { id: "96", autorId: "20", titulo: "A Odisseia", genero: "Poema Épico", edicao: "Tradução Direta", precoMedio: 65.00, quantidadeVendas: 50000000, dataLancamento: "800 a.C.", editora: "Editora 34", notaMediaLeitores: 4.7 },
     { id: "97", autorId: "1", titulo: "O Amor nos Tempos do Cólera", genero: "Romance", edicao: "Capa Comum", precoMedio: 58.00, quantidadeVendas: 10000000, dataLancamento: "1985-01-01", editora: "Record", notaMediaLeitores: 4.7 },
     { id: "98", autorId: "45", titulo: "Rápido e Devagar: Duas Formas de Pensar", genero: "Não-ficção", edicao: "Psicologia", precoMedio: 75.00, quantidadeVendas: 2000000, dataLancamento: "2011-10-25", editora: "Objetiva", notaMediaLeitores: 4.8 },
     { id: "99", autorId: "52", titulo: "O Cão dos Baskervilles", genero: "Mistério", edicao: "Sherlock Holmes", precoMedio: 41.00, quantidadeVendas: 15000000, dataLancamento: "1902-04-01", editora: "Zahar", notaMediaLeitores: 4.8 },
     { id: "100", autorId: "25", titulo: "A Importância de Ser Prudente", genero: "Comédia", edicao: "Teatro", precoMedio: 35.00, quantidadeVendas: 8000000, dataLancamento: "1895-02-14", editora: "L&PM", notaMediaLeitores: 4.6 },
 ];
 
-
+// =============================================================================
 // 3. RESOLVERS
-// Aqui definimos COMO buscar os dados, incluindo as relações entre eles.
+// =============================================================================
 const resolvers = {
-  // Resolvers para as queries principais
   Query: {
-    livros: () => livros,
+    livros: (parent, args) => {
+      let livrosFiltrados = livros;
+      const { filter } = args;
+      if (filter) {
+        if (filter.genero) {
+          livrosFiltrados = livrosFiltrados.filter(livro => livro.genero === filter.genero);
+        }
+        if (filter.editora) {
+          livrosFiltrados = livrosFiltrados.filter(livro => livro.editora === filter.editora);
+        }
+        if (filter.notaMinima) {
+          livrosFiltrados = livrosFiltrados.filter(livro => livro.notaMediaLeitores >= filter.notaMinima);
+        }
+      }
+      return livrosFiltrados;
+    },
     livro: (parent, args) => livros.find(livro => livro.id === args.id),
     autores: () => autores,
     autor: (parent, args) => autores.find(autor => autor.id === args.id),
   },
-
-  // Resolvers para os campos aninhados (a "mágica" do grafo)
-  Livro: {
-    // Quando uma query pedir o campo "autor" dentro de um "Livro"...
-    autor: (parent) => {
-      // ... o 'parent' é o objeto Livro. Usamos seu 'autorId' para encontrar o autor correspondente.
-      return autores.find(autor => autor.id === parent.autorId);
-    }
+  Mutation: {
+    adicionarLivro: (parent, args) => {
+        const { input } = args;
+        const autorExiste = autores.some(autor => autor.id === input.autorId);
+        if (!autorExiste) {
+            throw new Error(`Autor com ID '${input.autorId}' não foi encontrado.`);
+        }
+        const novoLivro = {
+            id: String(Date.now()),
+            ...input,
+            quantidadeVendas: 0, 
+            edicao: "1ª Edição (Lançamento)"
+        };
+        livros.push(novoLivro);
+        return novoLivro;
+    },
+    atualizarLivro: (parent, args) => {
+        const { id, input } = args;
+        const indexDoLivro = livros.findIndex(livro => livro.id === id);
+        if (indexDoLivro === -1) return null;
+        livros[indexDoLivro] = { ...livros[indexDoLivro], ...input };
+        return livros[indexDoLivro];
+    },
+    deletarLivro: (parent, args) => {
+        const { id } = args;
+        const indexDoLivro = livros.findIndex(livro => livro.id === id);
+        if (indexDoLivro === -1) return null;
+        const livroDeletado = livros.splice(indexDoLivro, 1);
+        return livroDeletado[0];
+    },
+    adicionarLivroComNovoAutor: (parent, args) => {
+        const { livroData, autorData } = args;
+        const novoAutor = {
+            id: String(Date.now() + 1), // Usando timestamp para ID único
+            ...autorData
+        };
+        autores.push(novoAutor);
+        const novoLivro = {
+            id: String(Date.now()), // Usando timestamp para ID único
+            ...livroData,
+            autorId: novoAutor.id,
+            quantidadeVendas: 0,
+            edicao: "1ª Edição"
+        };
+        livros.push(novoLivro);
+        return novoLivro;
+    },
   },
-
+  Livro: {
+    autor: (parent) => autores.find(autor => autor.id === parent.autorId),
+  },
   Autor: {
-    // Quando uma query pedir o campo "livros" dentro de um "Autor"...
-    livros: (parent) => {
-      // ... o 'parent' é o objeto Autor. Filtramos a lista de livros para achar todos que pertencem a ele.
-      return livros.filter(livro => livro.autorId === parent.id);
-    }
+    livros: (parent) => livros.filter(livro => livro.autorId === parent.id),
   }
 };
 
-
-// 4. CONFIGURAÇÃO E INICIALIZAÇÃO DO SERVIDOR
+// =============================================================================
+// 4. INICIALIZAÇÃO DO SERVIDOR
+// =============================================================================
 async function startServer() {
   const server = new ApolloServer({
     typeDefs,
@@ -259,7 +355,7 @@ async function startServer() {
     listen: { port: 4000 },
   });
 
-  console.log(`🚀 Servidor pronto em: ${url}`);
+  console.log(`🚀 Servidor GraphQL completo pronto em: ${url}`);
 }
 
 startServer();
