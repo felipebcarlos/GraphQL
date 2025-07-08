@@ -15,7 +15,7 @@ Este repositório documenta o passo a passo da criação de uma API para uma bib
   <img src="https://img.shields.io/badge/Node.js-18.x+-brightgreen?style=for-the-badge&logo=node.js" alt="Node.js version">
   <img src="https://img.shields.io/badge/GraphQL-v16.x-E10098?style=for-the-badge&logo=graphql" alt="GraphQL version">
   <img src="https://img.shields.io/badge/Apollo%20Server-v4.x-311C87?style=for-the-badge&logo=apollo-graphql" alt="Apollo Server version">
-  <img src="https://img.shields.io/github/license/felipebcarlos/GraphQL?style=for-the-badge" alt="License">
+  <img src="https://opensource.org/licenses/MIT">
 </p>
 
 ## 📚 Tabela de Conteúdos
